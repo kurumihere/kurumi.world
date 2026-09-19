@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kurumi.world</title>
+<style>
+:root {
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  background: #000;
+  color: #eee;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  line-height: 1.5;
+  margin: 0;
+  padding: 40px 20px;
+}
+main {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.lang {
+  text-align: right;
+  font-size: 0.9rem;
+}
+h1 {
+  font-size: 2rem;
+  margin: 20px 0;
+}
+.projects {
+  font-weight: bold;
+  margin-top: 24px;
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+li {
+  margin: 0 0 12px 32px;
+  text-indent: -16px;
+}
+footer {
+  margin-top: 24px;
+}
+hr {
+  border: none;
+  border-top: 1px solid #eee;
+}
+.meta {
+  color: #888;
+  font-size: 0.85rem;
+}
+[hidden] {
+  display: none;
+}
+</style>
+</head>
+<body>
+<main>
+<p class="lang"><a href="#ru" id="t-ru">ru</a> | <a href="#en" id="t-en">en</a></p>
+
+<div id="ru">
+<h1>kurumi</h1>
+<p>Называют также <i>fuck</i>; общаюсь в <a href="https://t.me/+eVqSMS7GuCNmMTdi">Синае</a>.</p>
+<p class="projects">Проекты</p>
+<ul>
+<li><a href="https://github.com/kurumihere/ktk-schedule">ktk-schedule</a> тг бот с расписанием для колледжа, для удобства учебы; недавно переписан на Rust с Go</li>
+<li><a href="https://github.com/kurumihere/mp">mp</a> музыкальный плеер, написан за 3-4 дня ради эксперимента и изучения raylib</li>
+</ul>
+<footer>
+<hr>
+<p>Telegram: <a href="https://t.me/kurumihere">@kurumihere</a><br>
+Git: <a href="https://github.com/kurumihere">github</a></p>
+<p class="meta"><small>last update: Sep 19, 2026</small></p>
+</footer>
+</div>
+
+<div id="en" hidden>
+<h1>kurumi</h1>
+<p>Also known as <i>fuck</i>; hanging out in <a href="https://t.me/+eVqSMS7GuCNmMTdi">Sinai</a>.</p>
+<p class="projects">Projects</p>
+<ul>
+<li><a href="https://github.com/kurumihere/ktk-schedule">ktk-schedule</a> telegram bot with college schedule, for study convenience; recently rewritten in Rust from Go</li>
+<li><a href="https://github.com/kurumihere/mp">mp</a> music player, written in 3-4 days as an experiment and to learn raylib</li>
+</ul>
+<footer>
+<hr>
+<p>Telegram: <a href="https://t.me/kurumihere">@kurumihere</a><br>
+Git: <a href="https://github.com/kurumihere">github</a></p>
+<p class="meta"><small>last update: Sep 19, 2026</small></p>
+</footer>
+</div>
+</main>
+
+<script>
+(function () {
+  function detect() {
+    var h = location.hash;
+    if (h === "#en" || h === "#ru") return h.slice(1);
+    try {
+      var s = localStorage.getItem("lang");
+      if (s === "en" || s === "ru") return s;
+    } catch (e) {}
+    var n = (navigator.language || "ru").toLowerCase();
+    return n.indexOf("ru") === 0 ? "ru" : "en";
+  }
+  function apply(l) {
+    document.getElementById("ru").hidden = l !== "ru";
+    document.getElementById("en").hidden = l !== "en";
+    document.documentElement.lang = l;
+    try { localStorage.setItem("lang", l); } catch (e) {}
+  }
+  document.getElementById("t-ru").addEventListener("click", function () { apply("ru"); });
+  document.getElementById("t-en").addEventListener("click", function () { apply("en"); });
+  window.addEventListener("hashchange", function () { apply(detect()); });
+  apply(detect());
+})();
+</script>
+</body>
+</html>
