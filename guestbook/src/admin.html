@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>guestbook admin</title>
+<style>
+:root {
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  background: #000;
+  color: #ccc;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 15px;
+  line-height: 1.45;
+  margin: 0;
+}
+main {
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 24px;
+}
+a {
+  color: #fff;
+}
+h1 {
+  color: #fff;
+  font-size: 1.05em;
+  margin: 0 0 4px;
+}
+.muted {
+  color: #666;
+}
+.filters {
+  margin: 0 0 16px;
+}
+.filters button.on {
+  color: #000;
+  background: #ccc;
+}
+.entry {
+  border-top: 1px solid #2a2a2a;
+  padding: 12px 0;
+}
+.head b {
+  color: #fff;
+}
+.tag {
+  color: #000;
+  background: #888;
+  padding: 0 4px;
+  font-size: 0.85em;
+}
+.tag.pub {
+  background: #ccc;
+}
+.msg {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 4px 0;
+}
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 3em;
+  margin: 6px 0;
+  background: #000;
+  color: #ccc;
+  border: 1px solid #2a2a2a;
+  font: inherit;
+  padding: 6px;
+  resize: vertical;
+}
+button {
+  background: #000;
+  color: #ccc;
+  border: 1px solid #444;
+  font: inherit;
+  font-size: 0.9em;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+button:hover {
+  border-color: #ccc;
+}
+.err {
+  color: #fff;
+}
+</style>
+</head>
+<body>
+<main>
+<h1>guestbook admin</h1>
+<p class="muted">approve, hide, reply, delete. <a href="/">back to site</a></p>
+<p class="filters">
+<button data-f="pending" class="on">pending</button>
+<button data-f="private">private</button>
+<button data-f="published">published</button>
+<button data-f="all">all</button>
+<span id="status" class="muted"></span>
+</p>
+<div id="list"></div>
+</main>
+
+<script>
+(function () {
+  var list = document.getElementById("list");
+  var status = document.getElementById("status");
+  var filter = "pending";
+  var entries = [];
+
+  function fmt(ts) {
+    var d = new Date(ts * 1000);
+    function p(n) { return n < 10 ? "0" + n : "" + n; }
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
+      " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function match(e) {
+    if (filter === "pending") return !e.approved && !e.private;
+    if (filter === "private") return e.private;
+    if (filter === "published") return e.approved;
+    return true;
+  }
+
+  function act(id, action, reply) {
+    status.textContent = "saving...";
+    return fetch("/api/admin/entries/" + id, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: action, reply: reply || "" })
+    }).then(function (r) {
+      if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || r.status); });
+      return load();
+    }).catch(function (e) {
+      status.textContent = "error: " + e.message;
+    });
+  }
+
+  function render() {
+    list.textContent = "";
+    var shown = entries.filter(match);
+    if (!shown.length) list.appendChild(el("p", "muted", "nothing here"));
+    shown.forEach(function (e) {
+      var box = el("div", "entry");
+
+      var head = el("div", "head");
+      head.appendChild(el("b", null, e.name));
+      head.appendChild(document.createTextNode(" "));
+      head.appendChild(el("span", "muted", "#" + e.id + " " + fmt(e.created) + " " + e.ip + " "));
+      if (e.private) head.appendChild(el("span", "tag", "private"));
+      else if (e.approved) head.appendChild(el("span", "tag pub", "published"));
+      else head.appendChild(el("span", "tag", "pending"));
+      box.appendChild(head);
+
+      if (e.url) {
+        var u = el("div", "muted", e.url);
+        box.appendChild(u);
+      }
+      box.appendChild(el("div", "msg", e.message));
+
+      var reply = el("textarea");
+      reply.placeholder = "reply (empty = no reply)";
+      reply.value = e.reply || "";
+      box.appendChild(reply);
+
+      function btn(label, fn) {
+        var b = el("button", null, label);
+        b.addEventListener("click", fn);
+        box.appendChild(b);
+        box.appendChild(document.createTextNode(" "));
+      }
+      btn("save reply", function () { act(e.id, "reply", reply.value); });
+      if (!e.private) {
+        if (e.approved) btn("hide", function () { act(e.id, "hide"); });
+        else btn("approve", function () {
+          var p = reply.value !== (e.reply || "") ? act(e.id, "reply", reply.value) : Promise.resolve();
+          p.then(function () { act(e.id, "approve"); });
+        });
+      }
+      btn("delete", function () {
+        if (confirm("delete #" + e.id + "?")) act(e.id, "delete");
+      });
+
+      list.appendChild(box);
+    });
+  }
+
+  function load() {
+    return fetch("/api/admin/entries").then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function (j) {
+      entries = j;
+      status.textContent = entries.filter(function (e) { return !e.approved && !e.private; }).length + " pending";
+      render();
+    }).catch(function (e) {
+      status.textContent = "error: " + e.message;
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".filters button"), function (b) {
+    b.addEventListener("click", function () {
+      filter = b.getAttribute("data-f");
+      Array.prototype.forEach.call(document.querySelectorAll(".filters button"), function (x) {
+        x.className = x === b ? "on" : "";
+      });
+      render();
+    });
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
