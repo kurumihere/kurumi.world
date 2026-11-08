@@ -17,7 +17,7 @@ use std::{
 use axum::{
     Json, Router,
     extract::{DefaultBodyLimit, Path, Request, State},
-    http::{HeaderMap, StatusCode, header},
+    http::{HeaderMap, StatusCode, Uri, header},
     middleware::{self, Next},
     response::{Html, IntoResponse, Response},
     routing::{get, post},
@@ -427,6 +427,28 @@ async fn require_admin(State(app): State<Shared>, req: Request, next: Next) -> R
         .into_response()
 }
 
+/// Serves a top-level file of the site (index.html, keys, *.css, *.js).
+fn serve_static(dir: &std::path::Path, path: &str) -> Response {
+    let name = match path.trim_start_matches('/') {
+        "" => "index.html",
+        name => name,
+    };
+    if name.contains(['/', '\\']) || name.starts_with('.') {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+    let content_type = match name.rsplit_once('.').map(|(_, ext)| ext) {
+        Some("html") => "text/html; charset=utf-8",
+        Some("css") => "text/css; charset=utf-8",
+        Some("js") => "text/javascript; charset=utf-8",
+        None if name == "keys" => "text/plain; charset=utf-8",
+        _ => return StatusCode::NOT_FOUND.into_response(),
+    };
+    match fs::read(dir.join(name)) {
+        Ok(body) => ([(header::CONTENT_TYPE, content_type)], body).into_response(),
+        Err(_) => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
 async fn admin_page() -> Html<&'static str> {
     Html(include_str!("admin.html"))
 }
@@ -452,35 +474,14 @@ async fn main() {
         .route("/api/views", post(view))
         .merge(admin);
 
-    // Local preview only: serve the site's index.html from GB_STATIC.
+    // Local preview only: serve the site's static files from GB_STATIC.
     // In production nginx serves static files and this stays unset.
     if let Ok(dir) = env::var("GB_STATIC") {
-        let keys = PathBuf::from(&dir).join("keys");
-        router = router.route(
-            "/keys",
-            get(move || {
-                let keys = keys.clone();
-                async move {
-                    match fs::read_to_string(&keys) {
-                        Ok(s) => ([(header::CONTENT_TYPE, "text/plain; charset=utf-8")], s).into_response(),
-                        Err(_) => StatusCode::NOT_FOUND.into_response(),
-                    }
-                }
-            }),
-        );
-        let index = PathBuf::from(dir).join("index.html");
-        router = router.route(
-            "/",
-            get(move || {
-                let index = index.clone();
-                async move {
-                    match fs::read_to_string(&index) {
-                        Ok(s) => Html(s).into_response(),
-                        Err(_) => StatusCode::NOT_FOUND.into_response(),
-                    }
-                }
-            }),
-        );
+        let dir = PathBuf::from(dir);
+        router = router.fallback(move |uri: Uri| {
+            let dir = dir.clone();
+            async move { serve_static(&dir, uri.path()) }
+        });
     }
 
     let router = router
