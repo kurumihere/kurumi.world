@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
-# Deploy kurumi.world to the VPS.
-#
-#   ./deploy.sh              push, update the page, rebuild + restart the guestbook if it changed
-#   ./deploy.sh site         only push and update the page
-#   ./deploy.sh guestbook    only rebuild + upload the guestbook server
-#   ./deploy.sh status       is everything up?
-#   ./deploy.sh logs         last guestbook log lines (follow with: ./deploy.sh logs -f)
-#
-# DEPLOY_HOST overrides the ssh host (default: vps).
 set -euo pipefail
 
 HOST=${DEPLOY_HOST:-vps}
@@ -20,6 +11,20 @@ cd "$(dirname "$(readlink -f "$0")")"
 
 say() { printf '\033[1m==>\033[0m %s\n' "$*"; }
 die() { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
+
+usage() {
+  cat <<EOF
+usage: ./deploy.sh [command]
+
+  all          push, update the page, rebuild + restart the guestbook if it changed (default)
+  site         only push and update the page
+  guestbook    only rebuild + upload the guestbook server
+  status       is everything up?
+  logs [-f]    last guestbook log lines
+
+DEPLOY_HOST overrides the ssh host (default: vps).
+EOF
+}
 
 push() {
   [[ $(git branch --show-current) == master ]] || die "not on master"
@@ -70,5 +75,5 @@ case ${1:-all} in
   guestbook) guestbook; status ;;
   status)    status ;;
   logs)      shift; ssh -t "$HOST" journalctl -u guestbook -n 50 --no-pager "$@" ;;
-  *)         sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *)         usage; exit 1 ;;
 esac
