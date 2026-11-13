@@ -4,60 +4,38 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
 <title>guestbook admin</title>
+<script src="/theme.js"></script>
+<link rel="stylesheet" href="/style.css">
 <style>
-:root {
-  color-scheme: dark;
-}
-* {
-  box-sizing: border-box;
-}
-body {
-  background: #000;
-  color: #ccc;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 15px;
-  line-height: 1.45;
-  margin: 0;
-}
-main {
-  max-width: 750px;
-  margin: 0 auto;
-  padding: 24px;
-}
-a {
-  color: #fff;
-}
 h1 {
-  color: #fff;
+  color: var(--strong);
   font-size: 1.05em;
   margin: 0 0 4px;
 }
 .muted {
-  color: #666;
+  color: var(--muted);
 }
 .filters {
   margin: 0 0 16px;
 }
 .filters button.on {
-  color: #000;
-  background: #ccc;
+  color: var(--page);
+  background: var(--text);
 }
 .entry {
-  border-top: 1px solid #2a2a2a;
+  border-top: 1px solid var(--border);
   padding: 12px 0;
 }
-.head b {
-  color: #fff;
-}
 .tag {
-  color: #000;
-  background: #888;
+  color: var(--page);
+  background: var(--muted);
   padding: 0 4px;
   font-size: 0.85em;
 }
 .tag.pub {
-  background: #ccc;
+  background: var(--text);
 }
 .msg {
   white-space: pre-wrap;
@@ -69,34 +47,34 @@ textarea {
   width: 100%;
   min-height: 3em;
   margin: 6px 0;
-  background: #000;
-  color: #ccc;
-  border: 1px solid #2a2a2a;
+  background: var(--page);
+  color: var(--text);
+  border: 1px solid var(--border);
   font: inherit;
   padding: 6px;
   resize: vertical;
 }
 button {
-  background: #000;
-  color: #ccc;
-  border: 1px solid #444;
+  background: var(--page);
+  color: var(--text);
+  border: 1px solid var(--disabled);
   font: inherit;
   font-size: 0.9em;
   padding: 1px 8px;
   cursor: pointer;
 }
 button:hover {
-  border-color: #ccc;
+  border-color: var(--text);
 }
 .err {
-  color: #fff;
+  color: var(--strong);
 }
 </style>
 </head>
 <body>
 <main>
 <h1>guestbook admin</h1>
-<p class="muted">approve, hide, reply, delete. <a href="/">back to site</a></p>
+<p class="muted">approve, hide, reply, delete. <a href="/">back to site</a> / <button type="button" id="theme-toggle" class="theme-toggle">[theme: auto]</button></p>
 <p class="filters">
 <button data-f="pending" class="on">pending</button>
 <button data-f="private">private</button>
