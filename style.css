@@ -1,14 +1,65 @@
 :root {
+  color-scheme: light dark;
+  --bg: #eee;
+  --dots: #d8d8d8;
+  --page: #fff;
+  --border: #ddd;
+  --border-soft: #eee;
+  --text: #333;
+  --strong: #000;
+  --muted: #777;
+  --faint: #999;
+  --placeholder: #aaa;
+  --disabled: #ccc;
+  --focus: #999;
+  --checkbox: #444;
+  --accent: #89b4fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #000;
+    --dots: #1c1c1c;
+    --page: #000;
+    --border: #2a2a2a;
+    --border-soft: #1c1c1c;
+    --text: #ccc;
+    --strong: #fff;
+    --muted: #888;
+    --faint: #666;
+    --placeholder: #555;
+    --disabled: #444;
+    --focus: #666;
+    --checkbox: #ccc;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
   color-scheme: dark;
+  --bg: #000;
+  --dots: #1c1c1c;
+  --page: #000;
+  --border: #2a2a2a;
+  --border-soft: #1c1c1c;
+  --text: #ccc;
+  --strong: #fff;
+  --muted: #888;
+  --faint: #666;
+  --placeholder: #555;
+  --disabled: #444;
+  --focus: #666;
+  --checkbox: #ccc;
 }
 * {
   box-sizing: border-box;
 }
 body {
-  background-color: #000;
-  background-image: radial-gradient(#1c1c1c 1px, transparent 1px);
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dots) 1px, transparent 1px);
   background-size: 8px 8px;
-  color: #ccc;
+  color: var(--text);
   font-family: ui-monospace, Menlo, Consolas, monospace;
   font-size: 15px;
   line-height: 1.45;
@@ -19,27 +70,27 @@ main {
   min-height: 100vh;
   margin: 0 auto;
   padding: 24px 24px 20px;
-  background: #000;
+  background: var(--page);
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #2a2a2a;
-  border-right: 1px solid #2a2a2a;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 a {
-  color: #fff;
+  color: var(--strong);
   text-underline-offset: 3px;
 }
 a:hover {
   text-decoration: none;
 }
 b {
-  color: #fff;
+  color: var(--strong);
 }
 p {
   margin: 0 0 16px;
 }
 .what {
-  color: #fff;
+  color: var(--strong);
   text-decoration: underline dotted;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -50,20 +101,20 @@ footer {
   margin-top: auto;
   padding-top: 40px;
   text-align: center;
-  color: #666;
+  color: var(--muted);
   font-size: 0.85em;
   line-height: 1.4;
 }
 footer hr {
   border: none;
-  border-top: 1px solid #2a2a2a;
+  border-top: 1px solid var(--border);
   margin: 0 0 12px;
 }
 footer a {
-  color: #999;
+  color: var(--muted);
 }
 h2 {
-  color: #fff;
+  color: var(--strong);
   font-size: 1.05em;
   font-weight: bold;
   margin: 28px 0 4px;
@@ -74,7 +125,7 @@ dl {
   margin: 0;
 }
 dt {
-  color: #888;
+  color: var(--muted);
 }
 dd {
   margin: 0;
@@ -88,27 +139,27 @@ dd {
   display: inline-block;
   width: 0.8em;
   height: 0.8em;
-  background: #89b4fa;
+  background: var(--accent);
   vertical-align: -1px;
 }
 .note {
-  color: #666;
+  color: var(--muted);
   margin: 0 0 8px;
 }
 .gb-list {
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--border);
   max-height: 420px;
   overflow-y: auto;
 }
 .gb-entry {
   padding: 8px 10px;
-  border-top: 1px solid #1c1c1c;
+  border-top: 1px solid var(--border-soft);
 }
 .gb-entry:first-child {
   border-top: none;
 }
 .gb-head {
-  color: #666;
+  color: var(--muted);
   font-size: 0.85em;
 }
 .gb-head b,
@@ -120,12 +171,12 @@ dd {
   overflow-wrap: anywhere;
 }
 .gb-reply {
-  color: #888;
+  color: var(--muted);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .gb-pending {
-  color: #666;
+  color: var(--faint);
   font-style: italic;
 }
 .pages {
@@ -153,7 +204,7 @@ dd {
   display: none;
 }
 .gb-empty {
-  color: #666;
+  color: var(--muted);
   padding: 8px 10px;
   margin: 0;
 }
@@ -161,16 +212,16 @@ dd {
   margin-top: 12px;
 }
 .gb-box {
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--border);
 }
 .gb-box:focus-within {
-  border-color: #666;
+  border-color: var(--focus);
 }
 .gb-form textarea,
 .gb-form input[type="url"],
 .gb-name {
   background: transparent;
-  color: #ccc;
+  color: var(--text);
   border: none;
   font: inherit;
   outline: none;
@@ -186,13 +237,13 @@ dd {
   display: block;
   width: 100%;
   padding: 4px 10px;
-  border-top: 1px dashed #2a2a2a;
+  border-top: 1px dashed var(--border);
 }
 .gb-form input[type="url"][hidden] {
   display: none;
 }
 ::placeholder {
-  color: #555;
+  color: var(--placeholder);
 }
 .gb-bar {
   display: flex;
@@ -203,21 +254,21 @@ dd {
 .gb-btn {
   background: none;
   border: none;
-  color: #888;
+  color: var(--muted);
   font: inherit;
   padding: 0;
   cursor: pointer;
 }
 .gb-btn:hover,
 .gb-btn.on {
-  color: #fff;
+  color: var(--strong);
 }
 .gb-btn[type="submit"] {
-  color: #fff;
+  color: var(--strong);
   font-weight: bold;
 }
 .gb-btn:disabled {
-  color: #444;
+  color: var(--disabled);
   cursor: default;
 }
 .gb-row {
@@ -226,31 +277,42 @@ dd {
   justify-content: space-between;
   gap: 4px 16px;
   margin-top: 6px;
-  color: #888;
+  color: var(--muted);
   font-size: 0.9em;
 }
 .gb-row label {
   cursor: pointer;
 }
 .gb-row input[type="checkbox"] {
-  accent-color: #ccc;
+  accent-color: var(--checkbox);
   margin: 0 4px 0 0;
   vertical-align: -2px;
 }
 .gb-name {
-  color: #fff;
+  color: var(--strong);
   font-weight: bold;
-  border-bottom: 1px dotted #666;
+  border-bottom: 1px dotted var(--focus);
   padding: 0;
   width: 14ch;
   max-width: 33ch;
   text-align: center;
 }
 .gb-status {
-  color: #888;
+  color: var(--muted);
   font-size: 0.9em;
   margin: 6px 0 0;
   min-height: 1.45em;
+}
+.theme-toggle {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  color: var(--strong);
 }
 .hp {
   position: absolute;
